@@ -46,5 +46,34 @@ def main():
                         st.session_state.messages = []
                     st.success(f'Loaded {uploaded_file.name}')
 
+    if st.session_state.context_text:
+        st.caption('Notes are loaded into the AI memory. Model is ready to use.')
+    else:
+        st.info('Expand the panel above to upload a PDF or paste text before starting a conversation.')
+
+    st.divider()
+
+    for message in st.session_state.messages:
+        with st.chat_message(message['role']):
+            st.markdown(message['content'])
+
+    if user_question := st.chat_input('Ask a question to your notes...'):
+
+        if not st.session_state.context_text.strip():
+            st.error('Load any notes first!')
+            st.stop()
+
+        with st.chat_message('user'):
+            st.markdown(user_question)
+
+        with st.chat_message('assistant'):
+            with st.spinner('Analyzing notes...'):
+                prompt = ContextPrompt(st.session_state.context_text, user_question)
+                response = agent.run(prompt)
+                st.markdown(response)
+
+        st.session_state.messages.append({'role': 'user', 'content': user_question})
+        st.session_state.messages.append({'role': 'assistant', 'content': response})
+
 if __name__ == "__main__":
     main()
