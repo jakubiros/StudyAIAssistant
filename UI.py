@@ -30,8 +30,8 @@ def main():
             st.session_state.messages = []
             st.rerun()
 
-    with st.expander('Manage education materials (Click, to expand)', expanded=not bool(st.session_state.context_text)):
-        tab_text,tab_pdf=st.tabs(['Paste text', 'Upload PDF'])
+    with st.expander('📚Manage education materials (Click, to expand)', expanded=not bool(st.session_state.context_text)):
+        tab_text,tab_pdf=st.tabs(['📝Paste text', '📄Upload PDF'])
 
         with tab_text:
             user_text=st.text_area('Paste notes:', height=350, placeholder='Copy and paste your text here...')
@@ -39,7 +39,7 @@ def main():
                 if user_text.strip():
                     st.session_state.context_text = user_text
                     st.session_state.messages = []
-                    st.success('Notes saved! You can use chat. ')
+                    st.success('✅Notes saved! You can use chat. ')
                 else:
                     st.warning('Area is empty.')
 
@@ -64,23 +64,41 @@ def main():
         with st.chat_message(message['role']):
             st.markdown(message['content'])
 
-    if user_question := st.chat_input('Ask a question to your notes...'):
+    final_question=None
+    if st.session_state.context_text:
+        st.markdown('Quick actions:')
+        qa_col1,qa_col2, qa_col3 = st.columns([2,2,1])
+        with qa_col1:
+            if st.button('Summary', use_container_width=True):
+                final_question='Write a summary of the entire text.'
+        with qa_col2:
+            if st.button('Key elements', use_container_width=True):
+                final_question='Extract key concepts from this text and provide brief definitions based on your notes'
+
+    user_input=st.chat_input('Ask a question to your notes...')
+    #if user_question := st.chat_input('Ask a question to your notes...'):
+
+    if user_input:
+        final_question=user_input
+
+    if final_question:
 
         if not st.session_state.context_text.strip():
             st.error('Load any notes first!')
             st.stop()
 
         with st.chat_message('user'):
-            st.markdown(user_question)
+            st.markdown(final_question)
 
         with st.chat_message('assistant'):
             with st.spinner('Analyzing notes...'):
-                prompt = ContextPrompt(st.session_state.context_text, user_question)
+                prompt = ContextPrompt(st.session_state.context_text, final_question)
                 response = agent.run(prompt)
                 st.markdown(response)
 
-        st.session_state.messages.append({'role': 'user', 'content': user_question})
+        st.session_state.messages.append({'role': 'user', 'content': final_question})
         st.session_state.messages.append({'role': 'assistant', 'content': response})
+        st.rerun()
 
 if __name__ == "__main__":
     main()
