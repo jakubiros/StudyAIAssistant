@@ -1,5 +1,5 @@
 import fitz
-import io
+import streamlit as st
 
 class DocumentReader:
     @staticmethod
@@ -11,5 +11,5 @@ class DocumentReader:
                 text +=page.get_text() + '\n'
             return text
         except Exception as e:
-            #st.error
+            st.error(f'Error during PDF loading {e}')
             return ''

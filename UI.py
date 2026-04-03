@@ -2,8 +2,8 @@ import streamlit as st
 from DataProcessing import DocumentReader
 from Model_predictions import OllamaAgent, ContextPrompt
 
-def get_agent():
-    return OllamaAgent()
+def get_agent(model_name='llama3.2:3b'):
+    return OllamaAgent(model_name)
 
 def main():
     st.set_page_config(page_title="AI Asystent", page_icon="🎓", layout="centered")
