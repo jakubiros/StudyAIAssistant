@@ -23,6 +23,7 @@ def main():
         model_list=['smollm2:1.7b','llama3.2:3b']
         selected_model=st.selectbox('Select model:', model_list, label_visibility='collapsed')
         agent=get_agent(selected_model)
+        st.caption(f'Selected model: {selected_model}')
 
     with col3:
         if st.button('Clear Chat', use_container_width=True):
