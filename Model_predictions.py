@@ -21,7 +21,7 @@ class ChatPrompt(BasePrompt):
     def get_messages(self):
         messages= [
             {'role': 'system', 'content': f'You are a helpful educational assistant. Answer user questions about notes. If the information is not in the text be clear about it.'
-                                          f'\n\n--- BRGINING OF NOTE ---\n{self.context}\n--- END OF NOTE ---'},
+                                          f'\n\n--- BEGINNING OF NOTE ---\n{self.context}\n--- END OF NOTE ---'},
         ]
         for msg in self.history:
             messages.append({'role':msg['role'], 'content':msg['content']})
@@ -31,18 +31,18 @@ class ChatPrompt(BasePrompt):
 class SummaryPrompt(BasePrompt):
         def get_messages(self):
             return [
-                {'role': 'system', 'content': 'Summarize and extract useful content'},
-                {'role': 'user', 'content': self.context}
+                {'role': 'system', 'content': 'You are education assistant. Summarize and extract useful content'},
+                {'role': 'user', 'content': f'Notes: {self.context}'},
             ]
 
 class KeyPrompt(BasePrompt):
     def get_messages(self):
         return [
-            {'role': 'system', 'content': 'Extract key points'},
-            {'role': 'user', 'content': self.context}
+            {'role': 'system', 'content': 'You are education assistant. Extract key points and definitions'},
+            {'role': 'user', 'content': f'Notes: {self.context}'},
         ]
 
-class ContextPrompt:
+'''class ContextPrompt:
     def __init__(self, text:str, user_question:str):
         self.text=text
         self.user_question=user_question
@@ -51,4 +51,4 @@ class ContextPrompt:
             {'role': 'system', 'content': f'You are a helpful educational assistant. Answer user questions about notes. If the information is not in the text be clear about it.'
                                           f'\n\n--- BRGINING OF NOTE ---\n{self.text}\n--- END OF NOTE ---'},
             {'role': 'user', 'content': self.user_question}
-        ]
+        ]'''
