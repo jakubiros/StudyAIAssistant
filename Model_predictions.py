@@ -9,25 +9,26 @@ class OllamaAgent:
         return response['message']['content']
 
 class BasePrompt:
-    def __init__(self, text:str):
-        self.text=text
+    def __init__(self, context_text:str, chat_history:list = None, question:str = ''):
+        self.context=context_text
+        self.history = chat_history or []
+        self.question=question
 
     def get_messages(self):
-        return [{'role':'user', 'content': self.text}]
-
+        raise NotImplementedError('Each type of prompt must implement this method')
 
 class SummaryPrompt(BasePrompt):
         def get_messages(self):
             return [
                 {'role': 'system', 'content': 'Summarize and extract useful content'},
-                {'role': 'user', 'content': self.text}
+                {'role': 'user', 'content': self.context}
             ]
 
 class KeyPrompt(BasePrompt):
     def get_messages(self):
         return [
             {'role': 'system', 'content': 'Extract key points'},
-            {'role': 'user', 'content': self.text}
+            {'role': 'user', 'content': self.context}
         ]
 
 class ContextPrompt:
@@ -36,7 +37,7 @@ class ContextPrompt:
         self.user_question=user_question
     def get_messages(self):
         return [
-            {'role': 'system', 'content': f'You are a helpful educational assistant. Answer user questions about notes. If the information is nott in the text be clear about it.'
+            {'role': 'system', 'content': f'You are a helpful educational assistant. Answer user questions about notes. If the information is not in the text be clear about it.'
                                           f'\n\n--- BRGINING OF NOTE ---\n{self.text}\n--- END OF NOTE ---'},
             {'role': 'user', 'content': self.user_question}
         ]
