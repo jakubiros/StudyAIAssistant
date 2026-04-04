@@ -17,6 +17,17 @@ class BasePrompt:
     def get_messages(self):
         raise NotImplementedError('Each type of prompt must implement this method')
 
+class ChatPrompt(BasePrompt):
+    def get_messages(self):
+        messages= [
+            {'role': 'system', 'content': f'You are a helpful educational assistant. Answer user questions about notes. If the information is not in the text be clear about it.'
+                                          f'\n\n--- BRGINING OF NOTE ---\n{self.context}\n--- END OF NOTE ---'},
+        ]
+        for msg in self.history:
+            messages.append({'role':msg['role'], 'content':msg['content']})
+        messages.append({'role': 'user', 'content': self.question})
+        return messages
+
 class SummaryPrompt(BasePrompt):
         def get_messages(self):
             return [
