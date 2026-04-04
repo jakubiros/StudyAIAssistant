@@ -1,6 +1,7 @@
 import streamlit as st
 from DataProcessing import DocumentReader
-from Model_predictions import OllamaAgent, ContextPrompt
+from Model_predictions import OllamaAgent, ChatPrompt, SummaryPrompt, KeyPrompt
+
 
 def get_agent(model_name='llama3.2:3b'):
     return OllamaAgent(model_name)
@@ -64,39 +65,42 @@ def main():
         with st.chat_message(message['role']):
             st.markdown(message['content'])
 
-    final_question=None
+    #final_question=None
+    active_prompt_object = None
+    display_message = None
+
     if st.session_state.context_text:
         st.markdown('Quick actions:')
         qa_col1,qa_col2, qa_col3 = st.columns([2,2,1])
         with qa_col1:
             if st.button('Summary', use_container_width=True):
-                final_question='Write a summary of the entire text.'
+                active_prompt_object=SummaryPrompt(st.session_state.context_text)
+                display_message='Write a summary of the entire text.'
         with qa_col2:
             if st.button('Key elements', use_container_width=True):
-                final_question='Extract key concepts from this text and provide brief definitions based on your notes'
+                active_prompt_object = KeyPrompt(st.session_state.context_text)
+                display_message='Extract key concepts from this text.'
 
-    user_input=st.chat_input('Ask a question to your notes...')
-    #if user_question := st.chat_input('Ask a question to your notes...'):
+    if user_input := st.chat_input('Ask a question to your notes...'):
+        active_prompt_object=ChatPrompt(context_text=st.session_state.context_text, chat_history=st.session_state.messages,
+                                        question=user_input)
+        display_message=user_input
 
-    if user_input:
-        final_question=user_input
-
-    if final_question:
+    if active_prompt_object and display_message:
 
         if not st.session_state.context_text.strip():
             st.error('Load any notes first!')
             st.stop()
 
         with st.chat_message('user'):
-            st.markdown(final_question)
+            st.markdown(display_message)
 
         with st.chat_message('assistant'):
             with st.spinner('Analyzing notes...'):
-                prompt = ContextPrompt(st.session_state.context_text, final_question)
-                response = agent.run(prompt)
+                response = agent.run(active_prompt_object)
                 st.markdown(response)
 
-        st.session_state.messages.append({'role': 'user', 'content': final_question})
+        st.session_state.messages.append({'role': 'user', 'content': display_message})
         st.session_state.messages.append({'role': 'assistant', 'content': response})
         st.rerun()
 
